@@ -24,8 +24,12 @@ SECRET_KEY = 'django-insecure-o9i3*_jip48zmz1xmf(-h@pnrh9zbq+t+x3m1d)h)_0m9saxqy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
+if DEBUG:
+    WEBSITE_URL='http://localhost:8000'
+else:
+    WEBSITE_URL= "http://82.112.250.23:1337"
 
 # Application definition
 
@@ -51,8 +55,24 @@ MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware',
 ROOT_URLCONF = 'backend.urls'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React/Vue/Angular en desarrollo
-    "https://tudominio.com",  # Dominio en producción
+    "http://82.112.250.23",  # Dominio en producción
+    "http://82.112.250.23:1337"
 ]
+
+
+CORS_TRUSTED_ORIGINS = [
+    "http://localhost:3000",  # React/Vue/Angular en desarrollo
+    "http://82.112.250.23",  # Dominio en producción
+    "http://82.112.250.23:1337"
+]
+
+
+CORS_ORIGINS_WHITELIST = [
+    "http://localhost:3000",  # React/Vue/Angular en desarrollo
+    "http://82.112.250.23",  # Dominio en producción
+    "http://82.112.250.23:1337"
+]
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -76,9 +96,13 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+   'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'aladinosWeb',  # Reemplaza con el nombre de tu base de datos
+        'USER': 'postgres',     # Reemplaza con tu nombre de usuario de PostgreSQL
+        'PASSWORD':'1',  # Reemplaza con tu contraseña de PostgreSQL
+        'HOST': 'localhost',  # Reemplaza con la dirección de tu servidor PostgreSQL (puede ser 'localhost' o una IP)
+        'PORT': '5432',        # Reemplaza con el puerto de tu servidor PostgreSQL (el puerto por defecto es 5432)
     }
 }
 
