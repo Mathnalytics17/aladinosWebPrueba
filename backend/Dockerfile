@@ -1,12 +1,11 @@
 # Usar una imagen base de Python
 FROM python:3.13.0a4-slim
 
-# Establecer el directorio de trabajo dentro del contenedor
+# Establecer el directorio de trabajo
 WORKDIR /usr/src/backend
 
-# Establecer variables de entorno
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Establecer PYTHONPATH
+ENV PYTHONPATH=/usr/src/backend
 
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -16,11 +15,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Instalar dependencias de Python
+# Copiar el archivo requirements.txt
 COPY requirements.txt .
+
+# Instalar dependencias de Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar el proyecto Django al contenedor
+# Copiar el resto del proyecto
 COPY . .
 
 # Exponer el puerto en el que se ejecutará la aplicación
