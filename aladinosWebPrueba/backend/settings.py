@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from apps.formulario.services import initialize_gspread
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).resolve().parent.parent
 import os
 from dotenv import load_dotenv
 
@@ -22,14 +22,14 @@ load_dotenv()
 SECRET_KEY = 'django-insecure-o9i3*_jip48zmz1xmf(-h@pnrh9zbq+t+x3m1d)h)_0m9saxqy'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
 if DEBUG:
     WEBSITE_URL='http://localhost:8000'
 else:
-    WEBSITE_URL= "http://82.112.250.23:1337"
+    WEBSITE_URL= "https://altasfundacionaladina.org/api"
 
 # Application definition
 
@@ -53,50 +53,38 @@ MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
-
-
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': False,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
-
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React/Vue/Angular en desarrollo
     "http://82.112.250.23",  # Dominio en producción
-    "http://82.112.250.23:1337"
+    "http://82.112.250.23:1337",
+    "https://www.altasfundacionaladina.org",
+    "https://altasfundacionaladina.org",
+    "http://82.112.250.23:3000",
 ]
 
 
 CORS_TRUSTED_ORIGINS = [
     "http://localhost:3000",  # React/Vue/Angular en desarrollo
     "http://82.112.250.23",  # Dominio en producción
-    "http://82.112.250.23:1337"
+    "http://82.112.250.23:1337",
+    "https://www.altasfundacionaladina.org",
+    "https://altasfundacionaladina.org",
+    "http://82.112.250.23:3000",
 ]
 
 
 CORS_ORIGINS_WHITELIST = [
     "http://localhost:3000",  # React/Vue/Angular en desarrollo
     "http://82.112.250.23",  # Dominio en producción
-    "http://82.112.250.23:1337"
+    "http://82.112.250.23:1337",
+    "https://altasfundacionaladina.org",
+    "http://82.112.250.23:3000",
 ]
-
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Apunta a dev/templates
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -118,10 +106,10 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
    'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'aladinosWeb',  # Reemplaza con el nombre de tu base de datos
-        'USER': 'postgres',     # Reemplaza con tu nombre de usuario de PostgreSQL
-        'PASSWORD':'1',  # Reemplaza con tu contraseña de PostgreSQL
-        'HOST': 'localhost',  # Reemplaza con la dirección de tu servidor PostgreSQL (puede ser 'localhost' o una IP)
+        'NAME': 'backend',  # Reemplaza con el nombre de tu base de datos
+        'USER': 'postgresuser',     # Reemplaza con tu nombre de usuario de PostgreSQL
+        'PASSWORD':'postgrespassword',  # Reemplaza con tu contraseña de PostgreSQL
+        'HOST': 'db',  # Reemplaza con la dirección de tu servidor PostgreSQL (puede ser 'localhost' o una IP)
         'PORT': '5432',        # Reemplaza con el puerto de tu servidor PostgreSQL (el puerto por defecto es 5432)
     }
 }
