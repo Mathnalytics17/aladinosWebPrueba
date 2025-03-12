@@ -65,7 +65,7 @@ def enviar_correo_con_pdf(destinatario,registro):
     email = EmailMessage(
         subject="Reporte en PDF",
         body="Adjunto encontrarás el reporte en PDF.",
-        from_email="luisjose0317@gmail.con",
+        from_email="socios@altasfundacionaladina.org",
         to=[destinatario],
     )
     email.attach("reporte.pdf", pdf_content, "application/pdf")
@@ -132,11 +132,11 @@ class FormularioCreateView(generics.CreateAPIView):
                 'fecha_recibo': datetime.now().strftime("%d/%m/%Y"),
                 'fecha_actual': datetime.now().strftime("%d/%m/%Y"),
             })
-            email = EmailMessage(subject, html_message, 'luisjose0317@gmail.com', ['luisjose0317@gmail.com'])
+            email = EmailMessage(subject, html_message, 'socios@altasfundacionaladina.org', ['socios@altasfundacionaladina.org'])
             email.content_subtype = "html" 
             try:
                 email.send()
-                enviar_correo_con_pdf("luisjose0317@gmail.com",data)
+                enviar_correo_con_pdf("socios@altasfundacionaladina.org",data)
             except SMTPException as e:
                 print(f"Error al enviar correo al administrador: {e}")
 
@@ -146,12 +146,12 @@ class FormularioCreateView(generics.CreateAPIView):
                 'nombre': registro.nombre,
                 
             })
-            email = EmailMessage(subject, html_message, 'no-reply@eventruck.com', [registro.correo_electronico])
+            email = EmailMessage(subject, html_message, 'socios@altasfundacionaladina.org', [registro.correo_electronico])
             email.content_subtype = "html"
 
             try:
                email.send()
-               enviar_correo_con_pdf("luisjose0317@gmail.com",data)
+               enviar_correo_con_pdf(registro.correo_electronico,data)
             except SMTPException as e:
                 print(f"Error al enviar correo al usuario: {e}")
 

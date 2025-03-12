@@ -135,11 +135,13 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = get_env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = get_env('EMAIL_HOST_PASSWORD')
+EMAIL_HOST = 'smtp.hostinger.com'  # Servidor SMTP de Hostinger
+EMAIL_PORT = 465  # Puerto seguro para SSL (también puedes probar con 587 para TLS)
+EMAIL_USE_SSL = True  # Si usas el puerto 465, usa SSL
+EMAIL_USE_TLS = False  # TLS solo si usas el puerto 587
+EMAIL_HOST_USER = get_env('EMAIL_HOST_USER')  # Tu correo en Hostinger
+EMAIL_HOST_PASSWORD = get_env('EMAIL_HOST_PASSWORD')  # La contraseña del correo
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 

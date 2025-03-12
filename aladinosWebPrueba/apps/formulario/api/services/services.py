@@ -28,7 +28,7 @@ def get_credentials() -> dict:
     }
 
 # Conectar con Google Sheets
-SPREADSHEET_NAME = "pruebaDjango"
+SPREADSHEET_NAME ="formularioAladinas"
 SPREAD_CLIENT = initialize_gspread()
 SPREADSHEET = SPREAD_CLIENT.open(SPREADSHEET_NAME)
 
