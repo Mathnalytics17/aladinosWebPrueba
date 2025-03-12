@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Alta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            color: #3498db;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+        .info p {
+            margin: 5px 0;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #777;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Formulario de Alta - Fundación Aladina</h1>
+
+    <div class="section">
+        <h2>Información Personal</h2>
+        <div class="info">
+            <p><strong>Nombre:</strong> {{ nombre }}</p>
+            <p><strong>Apellidos:</strong> {{ apellidos }}</p>
+            <p><strong>DNI:</strong> {{ numero_identificacion }}</p>
+            <p><strong>Fecha de Nacimiento:</strong> {{ fecha_nacimiento }}</p>
+            <p><strong>Género:</strong> {{ genero }}</p>
+            <p><strong>Dirección:</strong> {{ direccion }}</p>
+            <p><strong>CP:</strong> {{ cp }}</p>
+            <p><strong>Población:</strong> {{ poblacion }}</p>
+            <p><strong>Provincia:</strong> {{ provincia }}</p>
+            <p><strong>Teléfono Móvil:</strong> {{ telefono_movil }}</p>
+            <p><strong>Teléfono Casa:</strong> {{ telefono_casa }}</p>
+            <p><strong>Correo Electrónico:</strong> {{ correo_electronico }}</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Datos de Pago</h2>
+        <div class="info">
+            <p><strong>IBAN:</strong> {{ iban }}</p>
+            
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Datos de Donación</h2>
+        <div class="info">
+            <p><strong>Importe:</strong> {{ importe }}</p>
+            <p><strong>Periodicidad:</strong> {{ periodicidad }}</p>
+            <p><strong>Fecha Primer Pago:</strong> {{ fecha_primer_pago }}</p>
+            <p><strong>Día de Presentación:</strong> {{ dia_presentacion }}</p>
+        </div>
+    </div>
+
+    <div>
+        <h2>Firma del Socio:</h2>
+        <img src="{{ firma_socio }}" alt="Firma del Socio" style="width: 200px; height: 100px;">
+      </div>
+      <div>
+        <h2>Firma del Captador:</h2>
+        <img src="{{ firma_captador }}" alt="Firma del Captador" style="width: 200px; height: 100px;">
+      </div>
+
+    <div class="footer">
+        <p>Fundación Aladina - Tomás Bretón 50, 3ª Planta, Ofic. 5 - 28045 Madrid</p>
+    </div>
+</body>
+</html>

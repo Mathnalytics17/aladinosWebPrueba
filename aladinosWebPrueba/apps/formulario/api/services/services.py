@@ -38,17 +38,17 @@ def mapear_campos(data):
     """
     mapeo = {
         "saludo": "Saludo",
-        "primer_canal_captacion": "Primer Canal Captación",
+        "primer_canal_captacion": "Primer canal de captación",
         "canal_entrada": "Canal Entrada",
         "nombre": "Nombre",
         "apellidos": "Apellidos",
-        "tipo_identificacion": "Tipo Identificación",
-        "numero_identificacion": "Número Identificación",
+        "tipo_identificacion": "Tipo de identificación",
+        "numero_identificacion": "N° identificación",
         "fecha_nacimiento": "Fecha Nacimiento",
         "via_principal": "Vía Principal",
-        "cp_direccion": "CP Dirección",
-        "ciudad_direccion": "Ciudad Dirección",
-        "estado_provincia": "Estado/Provincia",
+        "cp_direccion": "CP de dirección principal",
+        "ciudad_direccion": "Ciudad de dirección principal",
+        "estado_provincia": "Estado/Provincia de dirección principal",
         "recibe_memoria": "Recibe Memoria",
         "recibe_correspondencia": "Recibe Correspondencia",
         "movil": "Móvil",
@@ -57,14 +57,14 @@ def mapear_campos(data):
         "descripcion": "Descripción",
         "importe": "Importe",
         "periodicidad": "Periodicidad",
-        "fecha_primer_pago": "Fecha Primer Pago",
+        "fecha_primer_pago":"Fecha primer pago",
         "dia_presentacion": "Día Presentación",
-        "medio_pago": "Medio Pago",
-        "tipo_pago": "Tipo Pago",
-        "no_iban": "Número Cuenta",
+        "medio_pago": "Medio de pago",
+        "tipo_pago": "Tipo de pago",
+        "no_iban": "Número de cuenta",
         "concepto_recibo": "Concepto Recibo",
         "mandato": "Mandato",
-        "nombre_autom": "Nombre Autom",
+        "nombre_autom": "Nombre (autom)",
         "persona_id": "Persona ID",
         "nombre_asterisco": "Nombre *",
         "fecha_alta": "Fecha Alta",
@@ -76,7 +76,8 @@ def mapear_campos(data):
         "explicacion_donacion_continua": "Explicación Donación Continua",
         "explicacion_no_programa_unico": "Explicación No Programa Único",
         "aceptacion_politica_privacidad": "Aceptación Política Privacidad",
-        "aceptacion_socio": "Aceptación Socio"
+        "aceptacion_socio": "Aceptación Socio",
+        "tipo_relacion": "Tipo relación",
     }
 
     return {mapeo[campo]: valor for campo, valor in data.items() if campo in mapeo}
@@ -104,17 +105,17 @@ def agregar_a_google_sheets(data):
     try:
         hoja = SPREADSHEET.worksheet(mes_actual)
     except gspread.exceptions.WorksheetNotFound:
-        hoja = SPREADSHEET.add_worksheet(title=mes_actual, rows="1000", cols="30")
+        hoja = SPREADSHEET.add_worksheet(title=mes_actual, rows="1000", cols="1000")
         # Agregar encabezado
         encabezado = [
-            "Codigo Fundraiser", "Nombre Fundraiser", "Saludo", "Primer Canal Captación", "Canal Entrada", "Nombre", "Apellidos",
-            "Tipo Identificación", "Número Identificación", "Fecha Nacimiento",
-            "Vía Principal", "CP Dirección", "Ciudad Dirección", "Estado/Provincia",
+            "Codigo Fundraiser", "Nombre Fundraiser", "Saludo", "Primer canal de captación", "Canal Entrada", "Nombre", "Apellidos",
+            "Tipo de identificación", "N° identificación", "Fecha Nacimiento",
+            "Vía Principal", "CP de dirección principal", "Ciudad de dirección principal", "Estado/Provincia de dirección principal",
             "Recibe Memoria", "Recibe Correspondencia", "Móvil", "Teléfono Casa",
             "Correo Electrónico", "Descripción", "Importe",
-            "Periodicidad", "Fecha Primer Pago", "Día Presentación", "Medio Pago",
-            "Tipo Pago", "Número Cuenta", "Concepto Recibo", "Mandato", "Nombre Autom",
-            "Persona ID", "Nombre *", "Fecha Alta"
+            "Periodicidad","Fecha primer pago","Día Presentación", "Medio de pago",
+            "Tipo de pago", "Número de cuenta", "Concepto Recibo", "Mandato", "Nombre (autom)",
+            "Persona ID", "Nombre *", "Fecha Alta","Tipo relación",
         ]
         hoja.append_row(encabezado)
 
@@ -125,8 +126,8 @@ def agregar_a_google_sheets(data):
     encabezados = hoja.row_values(1)  # La primera fila contiene los nombres de las columnas
 
     # Depuración: Imprimir los encabezados y los datos mapeados
-    print("Encabezados:", encabezados)
-    print("Data Mapeado:", data_mapeado)
+    print("Encabezados:", len(encabezados))
+    print("Data Mapeado:", len(data_mapeado))
 
     # Verificar si faltan columnas en la hoja y añadirlas si es necesario
     columnas_faltantes = set(data_mapeado.keys()) - set(encabezados)

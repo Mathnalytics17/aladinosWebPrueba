@@ -62,7 +62,7 @@ class Formulario(models.Model):
         ('Anual', 'Anual')
     ]
     periodicidad = models.CharField(max_length=20, choices=PERIODICIDAD_CHOICES,default='Mensual')
-    fecha_primer_pago = models.DateField(blank=True, null=True)
+   
     dia_presentacion = models.CharField(max_length=222,default='0')
     
     medio_pago = models.CharField(max_length=20, default='DOMICILIACIÓN')

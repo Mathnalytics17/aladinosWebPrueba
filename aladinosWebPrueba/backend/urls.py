@@ -16,12 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from apps.formulario.api.views.index import validar_dni
+from apps.formulario.api.views.index import validar_dni,validar_iban
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('apps.formulario.urls')),
     path('api/registro/', include('apps.formulario.api.routes.index')),
-    
+    path('api/validar_iban/', validar_iban, name='validar_iban'),
 
     path('api/validar-dni/', validar_dni, name='validar_dni'),
 
