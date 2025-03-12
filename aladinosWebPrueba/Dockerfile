@@ -1,5 +1,5 @@
 # Usar una imagen base de Python
-FROM python:3.13.0a4-slim
+FROM python:3.12-slim 
 
 # Establecer el directorio de trabajo
 WORKDIR /usr/src/aladinosWebPrueba
