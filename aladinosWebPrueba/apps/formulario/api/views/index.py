@@ -17,7 +17,7 @@ from .ibanValidator.openibanlib import openiban
 from .ibanValidator.openibanlib.exceptions import IBANFormatValidationException
 #GOOGLE SHEETS
 
-from apps.formulario.api.services.services import agregar_a_google_sheets
+from apps.formulario.api.services.services import agregar_a_google_sheets,agregar_a_google_sheetsBotonGuardarBorrador
     # views.py
 import requests
 from django.http import JsonResponse
@@ -132,30 +132,148 @@ class FormularioCreateView(generics.CreateAPIView):
                 'fecha_recibo': datetime.now().strftime("%d/%m/%Y"),
                 'fecha_actual': datetime.now().strftime("%d/%m/%Y"),
             })
-            email = EmailMessage(subject, html_message, 'socios@altasfundacionaladina.org', ['socios@altasfundacionaladina.org'])
-            email.content_subtype = "html" 
-            try:
-                email.send()
-                enviar_correo_con_pdf("socios@altasfundacionaladina.org",data)
-            except SMTPException as e:
-                print(f"Error al enviar correo al administrador: {e}")
+            # Crear el correo electrónico
+            email = EmailMessage(
+                subject,
+                html_message,
+                "Fundación Aladina <socios@altasfundacionaladina.org>",
+                [registro.correo_electronico]
+            )
+            email.content_subtype = "html"  # Establecer el contenido como HTML
 
-           # Enviar correo de bienvenida al usuario
+            try:
+                # Generar el PDF
+                pdf_content = generar_pdf("formpdf.html", {
+                    'nombre': data['nombre'],
+                    'apellidos': data['apellidos'],
+                    'numero_identificacion': data['numero_identificacion'],
+                    'fecha_nacimiento': data['fecha_nacimiento'],
+                    'genero': data['genero'],
+                    'direccion': data['via_principal'],
+                    'cp': data['cp_direccion'],
+                    'poblacion': data['ciudad_direccion'],
+                    'provincia': data['estado_provincia'],
+                    'telefono_movil': data['movil'],
+                    'telefono_casa': data['telefono_casa'],
+                    'correo_electronico': data['correo_electronico'],
+                    'iban': data['no_iban'],
+                    'firma_captador': data['firma_captador'],
+                    'firma_socio': data['firma_socio'],
+                    'importe': data['importe'],
+                    'periodicidad': data['periodicidad'],
+                    'dia_presentacion': datetime.now().strftime("%d/%m/%y"),
+                })
+
+                if not pdf_content:
+                    print("Error: No se pudo generar el PDF.")
+                    return "Error al generar el PDF"
+
+                # Adjuntar el PDF al correo
+                email.attach("reporte.pdf", pdf_content, "application/pdf")
+
+                # Enviar el correo
+                email.send()
+                print("Correo enviado correctamente.")
+
+            except SMTPException as e:
+                print(f"Error al enviar el correo: {e}")
+            except Exception as e:
+                print(f"Error inesperado: {e}")
+
             subject = "¡Hemos recibido tu alta en Fundación Aladina!"
             html_message = render_to_string('email_client.html', {
                 'nombre': registro.nombre,
-                
             })
-            email = EmailMessage(subject, html_message, 'socios@altasfundacionaladina.org', [registro.correo_electronico])
-            email.content_subtype = "html"
+
+            # Crear el correo electrónico
+            email = EmailMessage(
+                subject,
+                html_message,
+                "Fundación Aladina <socios@altasfundacionaladina.org>",
+                [registro.correo_electronico]
+            )
+            email.content_subtype = "html"  # Establecer el contenido como HTML
 
             try:
-               email.send()
-               enviar_correo_con_pdf(registro.correo_electronico,data)
-            except SMTPException as e:
-                print(f"Error al enviar correo al usuario: {e}")
+                # Generar el PDF
+                pdf_content = generar_pdf("formpdf.html", {
+                    'nombre': data['nombre'],
+                    'apellidos': data['apellidos'],
+                    'numero_identificacion': data['numero_identificacion'],
+                    'fecha_nacimiento': data['fecha_nacimiento'],
+                    'genero': data['genero'],
+                    'direccion': data['via_principal'],
+                    'cp': data['cp_direccion'],
+                    'poblacion': data['ciudad_direccion'],
+                    'provincia': data['estado_provincia'],
+                    'telefono_movil': data['movil'],
+                    'telefono_casa': data['telefono_casa'],
+                    'correo_electronico': data['correo_electronico'],
+                    'iban': data['no_iban'],
+                    'firma_captador': data['firma_captador'],
+                    'firma_socio': data['firma_socio'],
+                    'importe': data['importe'],
+                    'periodicidad': data['periodicidad'],
+                    'dia_presentacion': datetime.now().strftime("%d/%m/%y"),
+                })
 
-            datos_transformados = transformar_fechas(serializer.data)
+                if not pdf_content:
+                    print("Error: No se pudo generar el PDF.")
+                    return "Error al generar el PDF"
+
+                # Adjuntar el PDF al correo
+                email.attach("reporte.pdf", pdf_content, "application/pdf")
+
+                # Enviar el correo
+                email.send()
+                print("Correo enviado correctamente.")
+
+            except SMTPException as e:
+                print(f"Error al enviar el correo: {e}")
+            except Exception as e:
+                print(f"Error inesperado: {e}")
+            datos = {
+    "apellidos": data["apellidos"],
+    "canal_entrada": data["canal_entrada"],
+    "ciudad_direccion": data["ciudad_direccion"],
+    "concepto_recibo": data["concepto_recibo"],
+    "correo_electronico": data["correo_electronico"],
+    "cp_direccion": data["cp_direccion"],
+    
+    "descripcion": data["descripcion"],
+    "dia_presentacion": data["dia_presentacion"],
+    "estado_provincia": data["estado_provincia"],
+    "fecha_alta": data["fecha_alta"],
+    "fecha_nacimiento": data["fecha_nacimiento"],
+    "fundraiser_code": data["fundraiser_code"],
+    "fundraiser_name": data["fundraiser_name"],
+    "genero": data["genero"],
+    
+    "importe": data["importe"],
+    "mandato": data["mandato"],
+    "medio_pago": data["medio_pago"],
+    "movil": data["movil"],
+    "no_iban": data["no_iban"],
+    "nombre": data["nombre"],
+    "nombre_asterisco": data["nombre_asterisco"],
+    "nombre_autom": data["nombre_autom"],
+   
+    "numero_identificacion": data["numero_identificacion"],
+    "otra_cantidad": data["otra_cantidad"],
+    "periodicidad": data["periodicidad"],
+    "persona_id": data["persona_id"],
+    "primer_canal_captacion": data["primer_canal_captacion"],
+    "recibe_correspondencia": data["recibe_correspondencia"],
+    "recibe_memoria": data["recibe_memoria"],
+    "saludo": data["saludo"],
+    "telefono_casa": data["telefono_casa"],
+    "tipo_identificacion": data["tipo_identificacion"],
+    "tipo_pago": data["tipo_pago"],
+    "tipo_relacion": data["tipo_relacion"],
+    "via_principal": data["via_principal"],
+    "fecha_ingreso_dato":data["fecha_ingreso_dato"]
+}
+            datos_transformados = transformar_fechas( datos)
             agregar_a_google_sheets(datos_transformados)  # Agregar a Google Sheets
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -179,7 +297,7 @@ class FormularioGoogleSheetsView(generics.CreateAPIView):
 
         # Enviar los datos a Google Sheets
         try:
-            agregar_a_google_sheets(data)  # Llama a tu función para enviar datos a Google Sheets
+            agregar_a_google_sheetsBotonGuardarBorrador(data)  # Llama a tu función para enviar datos a Google Sheets
             return Response({"message": "Datos enviados a Google Sheets correctamente"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": f"Error al enviar datos a Google Sheets: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

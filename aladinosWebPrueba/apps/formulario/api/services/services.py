@@ -2,6 +2,7 @@ import os
 import gspread
 import datetime
 from typing import List
+from gspread_formatting import *
 
 def initialize_gspread() -> gspread.client.Client:
     """
@@ -28,8 +29,12 @@ def get_credentials() -> dict:
     }
 
 # Conectar con Google Sheets
-SPREADSHEET_NAME ="formularioAladinas"
+
+SPREADSHEET_NAME ="Formulario oficial F. Aladina"
+
 SPREAD_CLIENT = initialize_gspread()
+spreadsheet_list = SPREAD_CLIENT.openall()
+print([spread.title for spread in spreadsheet_list])
 SPREADSHEET = SPREAD_CLIENT.open(SPREADSHEET_NAME)
 
 def mapear_campos(data):
@@ -37,6 +42,7 @@ def mapear_campos(data):
     Mapea los nombres de los campos en data a los nombres de las columnas en Google Sheets.
     """
     mapeo = {
+        "fecha_ingreso_dato":"Fecha ingreso",
         "saludo": "Saludo",
         "primer_canal_captacion": "Primer canal de captación",
         "canal_entrada": "Canal Entrada",
@@ -92,12 +98,14 @@ def encontrar_primera_fila_vacia(hoja):
             return i + 1  # Las filas en gspread comienzan en 1
     return len(filas) + 1  # Si no hay filas vacías, devuelve la siguiente fila
 
+import gspread
+from gspread_formatting import *
+
 def agregar_a_google_sheets(data):
     """
     Agrega datos a una hoja específica dentro del Google Sheet.
     Si la hoja del mes actual no existe, la crea con un encabezado.
-    Utiliza nombres de columnas para mapear los datos, lo que permite
-    que el script funcione incluso si las columnas se reordenan.
+    Aplica formato de texto rojo a la columna 'Día de Presentación'.
     """
     mes_actual = datetime.datetime.now().strftime("%Y-%m")  # Formato "YYYY-MM"
 
@@ -108,14 +116,13 @@ def agregar_a_google_sheets(data):
         hoja = SPREADSHEET.add_worksheet(title=mes_actual, rows="1000", cols="1000")
         # Agregar encabezado
         encabezado = [
-            "Codigo Fundraiser", "Nombre Fundraiser", "Saludo", "Primer canal de captación", "Canal Entrada", "Nombre", "Apellidos",
-            "Tipo de identificación", "N° identificación", "Fecha Nacimiento",
-            "Vía Principal", "CP de dirección principal", "Ciudad de dirección principal", "Estado/Provincia de dirección principal",
-            "Recibe Memoria", "Recibe Correspondencia", "Móvil", "Teléfono Casa",
-            "Correo Electrónico", "Descripción", "Importe",
-            "Periodicidad","Fecha primer pago","Día Presentación", "Medio de pago",
-            "Tipo de pago", "Número de cuenta", "Concepto Recibo", "Mandato", "Nombre (autom)",
-            "Persona ID", "Nombre *", "Fecha Alta","Tipo relación",
+            "Fecha ingreso", "Codigo Fundraiser", "Nombre Fundraiser", "Saludo", "Primer canal de captación", 
+            "Canal Entrada", "Nombre", "Apellidos", "Tipo de identificación", "N° identificación", 
+            "Fecha Nacimiento", "Vía Principal", "CP de dirección principal", "Ciudad de dirección principal", 
+            "Estado/Provincia de dirección principal", "Recibe Memoria", "Recibe Correspondencia", "Móvil", 
+            "Teléfono Casa", "Correo Electrónico", "Descripción", "Importe", "Periodicidad", "Fecha primer pago", 
+            "Día Presentación", "Medio de pago", "Tipo de pago", "Número de cuenta", "Concepto Recibo", 
+            "Mandato", "Nombre (autom)", "Persona ID", "Nombre *", "Fecha Alta", "Tipo relación",
         ]
         hoja.append_row(encabezado)
 
@@ -124,10 +131,6 @@ def agregar_a_google_sheets(data):
 
     # Obtener los nombres de las columnas de la hoja
     encabezados = hoja.row_values(1)  # La primera fila contiene los nombres de las columnas
-
-    # Depuración: Imprimir los encabezados y los datos mapeados
-    print("Encabezados:", len(encabezados))
-    print("Data Mapeado:", len(data_mapeado))
 
     # Verificar si faltan columnas en la hoja y añadirlas si es necesario
     columnas_faltantes = set(data_mapeado.keys()) - set(encabezados)
@@ -147,11 +150,95 @@ def agregar_a_google_sheets(data):
         else:
             print(f"⚠️ Advertencia: La columna '{columna}' no existe en la hoja.")
 
-    # Depuración: Imprimir la fila que se va a agregar
-    print("Fila a agregar:", fila)
+    # Encontrar la primera fila vacía
+    primera_fila_vacia = encontrar_primera_fila_vacia(hoja)
+
+    # Insertar la fila en la posición correcta
+    hoja.insert_row(fila, primera_fila_vacia)
+
+    # Aplicar formato de texto rojo a la columna "Día de Presentación"
+    if "Día Presentación" in encabezados:
+        indice_columna = encabezados.index("Día Presentación") + 1  # Las columnas comienzan en 1
+        formato_texto = CellFormat(
+            textFormat=TextFormat(
+                foregroundColor=Color(1, 0, 0)  # Color rojo (RGB: 1, 0, 0)
+            )
+        )
+        # Aplicar formato a toda la columna
+        format_cell_range(hoja, f"{gspread.utils.rowcol_to_a1(2, indice_columna)}:{gspread.utils.rowcol_to_a1(1000, indice_columna)}", formato_texto)
+        print(f"✅ Formato de texto rojo aplicado a la columna 'Día Presentación'.")
+    else:
+        print(f"⚠️ Advertencia: La columna 'Día Presentación' no existe en la hoja.")
+        
+        
+        
+
+import gspread
+from gspread_formatting import *
+
+def agregar_a_google_sheetsBotonGuardarBorrador(data):
+    """
+    Agrega datos a una hoja específica dentro del Google Sheet.
+    Si la hoja del mes actual no existe, la crea con un encabezado.
+    Aplica formato de texto rojo a toda la fila recién creada.
+    """
+    mes_actual = datetime.datetime.now().strftime("%Y-%m")  # Formato "YYYY-MM"
+
+    # Verificar si la hoja del mes existe, si no, crearla
+    try:
+        hoja = SPREADSHEET.worksheet(mes_actual)
+    except gspread.exceptions.WorksheetNotFound:
+        hoja = SPREADSHEET.add_worksheet(title=mes_actual, rows="1000", cols="1000")
+        # Agregar encabezado
+        encabezado = [
+            "Fecha ingreso", "Codigo Fundraiser", "Nombre Fundraiser", "Saludo", "Primer canal de captación", 
+            "Canal Entrada", "Nombre", "Apellidos", "Tipo de identificación", "N° identificación", 
+            "Fecha Nacimiento", "Vía Principal", "CP de dirección principal", "Ciudad de dirección principal", 
+            "Estado/Provincia de dirección principal", "Recibe Memoria", "Recibe Correspondencia", "Móvil", 
+            "Teléfono Casa", "Correo Electrónico", "Descripción", "Importe", "Periodicidad", "Fecha primer pago", 
+            "Día Presentación", "Medio de pago", "Tipo de pago", "Número de cuenta", "Concepto Recibo", 
+            "Mandato", "Nombre (autom)", "Persona ID", "Nombre *", "Fecha Alta", "Tipo relación",
+        ]
+        hoja.append_row(encabezado)
+
+    # Mapear los nombres de los campos en `data` a los nombres de las columnas en Google Sheets
+    data_mapeado = mapear_campos(data)
+
+    # Obtener los nombres de las columnas de la hoja
+    encabezados = hoja.row_values(1)  # La primera fila contiene los nombres de las columnas
+
+    # Verificar si faltan columnas en la hoja y añadirlas si es necesario
+    columnas_faltantes = set(data_mapeado.keys()) - set(encabezados)
+    if columnas_faltantes:
+        # Añadir las columnas faltantes al final
+        hoja.insert_cols(values=list(columnas_faltantes), col=len(encabezados) + 1)
+        encabezados.extend(columnas_faltantes)  # Actualizar la lista de encabezados
+
+    # Crear una lista para almacenar los valores de la fila
+    fila = [""] * len(encabezados)  # Inicializar con valores vacíos
+
+    # Mapear los datos a las columnas correctas usando los nombres de las columnas
+    for columna, valor in data_mapeado.items():
+        if columna in encabezados:
+            indice = encabezados.index(columna)  # Obtener el índice de la columna
+            fila[indice] = valor  # Asignar el valor a la posición correcta
+        else:
+            print(f"⚠️ Advertencia: La columna '{columna}' no existe en la hoja.")
 
     # Encontrar la primera fila vacía
     primera_fila_vacia = encontrar_primera_fila_vacia(hoja)
 
     # Insertar la fila en la posición correcta
     hoja.insert_row(fila, primera_fila_vacia)
+
+    # Aplicar formato de texto rojo a toda la fila recién creada
+    formato_texto = CellFormat(
+        textFormat=TextFormat(
+            foregroundColor=Color(1, 0, 0)  # Color rojo (RGB: 1, 0, 0)
+        )
+    )
+    # Definir el rango de la fila recién creada
+    rango_fila = f"{gspread.utils.rowcol_to_a1(primera_fila_vacia, 1)}:{gspread.utils.rowcol_to_a1(primera_fila_vacia, len(encabezados))}"
+    # Aplicar el formato a toda la fila
+    format_cell_range(hoja, rango_fila, formato_texto)
+    print(f"✅ Formato de texto rojo aplicado a la fila {primera_fila_vacia}.")
