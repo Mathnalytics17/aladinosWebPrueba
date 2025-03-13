@@ -137,7 +137,7 @@ class FormularioCreateView(generics.CreateAPIView):
                 subject,
                 html_message,
                 "Fundación Aladina <socios@altasfundacionaladina.org>",
-                [registro.correo_electronico]
+                ["socios@altasfundacionaladina.org"]
             )
             email.content_subtype = "html"  # Establecer el contenido como HTML
 
