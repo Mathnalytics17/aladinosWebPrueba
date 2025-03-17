@@ -45,14 +45,8 @@ class Formulario(models.Model):
     correo_electronico = models.EmailField()
     descripcion = models.TextField(blank=True, null=True)
     
-    IMPORTE_CHOICES = [
-        ('10€', '10€'),
-        ('20€', '20€'),
-        ('30€', '30€'),
-        ('50€', '50€'),
-        ('Otra Cantidad', 'Otra Cantidad')
-    ]
-    importe = models.CharField(max_length=20, choices=IMPORTE_CHOICES,default='Otra Cantidad')
+  
+    importe = models.CharField(max_length=20, default='2222')
     otra_cantidad = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     
     PERIODICIDAD_CHOICES = [
