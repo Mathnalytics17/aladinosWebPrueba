@@ -33,15 +33,15 @@ class Formulario(models.Model):
     fecha_nacimiento = models.DateField()
     
     via_principal = models.CharField(max_length=255)
-    cp_direccion = models.CharField(max_length=10)
+    cp_direccion = models.CharField(max_length=5)
     ciudad_direccion = models.CharField(max_length=100)
     estado_provincia = models.CharField(max_length=100)
     
     recibe_memoria = models.CharField(max_length=2, default='SI')
     recibe_correspondencia = models.CharField(max_length=20, default='SI')
     
-    movil = models.CharField(max_length=20)
-    telefono_casa = models.CharField(max_length=20, blank=True, null=True)
+    movil = models.CharField(max_length=9)
+    telefono_casa = models.CharField(max_length=9, blank=True, null=True)
     correo_electronico = models.EmailField(blank=True, null=True)
     descripcion = models.TextField(blank=True, null=True)
     
