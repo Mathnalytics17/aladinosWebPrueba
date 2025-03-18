@@ -10,7 +10,7 @@ class Formulario(models.Model):
     genero = models.CharField(max_length=12, choices=GENERO_CHOICES,default='masculino')
     created_at= models.DateField(default='2011-03-11')
     fundraiser_name=models.CharField(default='2222',max_length=225)
-    fundraiser_code=models.IntegerField(default='11111')
+    fundraiser_code=models.BigIntegerField(default='11111')
     
     SALUDO_CHOICES = [
         ('D.', 'Don'),
@@ -42,12 +42,12 @@ class Formulario(models.Model):
     
     movil = models.CharField(max_length=20)
     telefono_casa = models.CharField(max_length=20, blank=True, null=True)
-    correo_electronico = models.EmailField()
+    correo_electronico = models.EmailField(blank=True, null=True)
     descripcion = models.TextField(blank=True, null=True)
     
-  
-    importe = models.CharField(max_length=20, default='2222')
-    otra_cantidad = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+   
+    importe = models.CharField(max_length=40,default='2222222')
+    otra_cantidad = models.CharField(max_length=40,default='2222222',blank=True, null=True)
     
     PERIODICIDAD_CHOICES = [
         ('Mensual', 'Mensual'),
