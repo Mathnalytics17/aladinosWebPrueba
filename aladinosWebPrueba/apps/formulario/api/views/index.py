@@ -17,8 +17,12 @@ from .ibanValidator.openibanlib import openiban
 from .ibanValidator.openibanlib.exceptions import IBANFormatValidationException
 #GOOGLE SHEETS
 
-from apps.formulario.api.services.services import agregar_a_google_sheets,agregar_a_google_sheetsBotonGuardarBorrador
-    # views.py
+from apps.formulario.api.services.services import agregar_a_google_sheets,agregar_a_google_sheetsBotonGuardarBorrador2
+
+from apps.formulario.api.services.servicesGuardarFormulario import agregar_a_google_sheetsBotonGuardarBorrador
+
+
+# views.py
 import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -68,7 +72,7 @@ def enviar_correo_con_pdf(destinatario,registro):
         from_email="socios@altasfundacionaladina.org",
         to=[destinatario],
     )
-    email.attach("reporte.pdf", pdf_content, "application/pdf")
+    email.attach("Copia de Socio. Fundación Aladina.pdf", pdf_content, "application/pdf")
     email.send()
     return "Correo enviado correctamente"
 
@@ -169,7 +173,7 @@ class FormularioCreateView(generics.CreateAPIView):
                     return "Error al generar el PDF"
 
                 # Adjuntar el PDF al correo
-                email.attach("reporte.pdf", pdf_content, "application/pdf")
+                email.attach("Copia de Socio. Fundación Aladina.pdf", pdf_content, "application/pdf")
 
                 # Enviar el correo
                 email.send()
@@ -222,7 +226,7 @@ class FormularioCreateView(generics.CreateAPIView):
                     return "Error al generar el PDF"
 
                 # Adjuntar el PDF al correo
-                email.attach("reporte.pdf", pdf_content, "application/pdf")
+                email.attach("Copia de Socio. Fundación Aladina.pdf", pdf_content, "application/pdf")
 
                 # Enviar el correo
                 email.send()
@@ -271,10 +275,12 @@ class FormularioCreateView(generics.CreateAPIView):
     "tipo_pago": data["tipo_pago"],
     "tipo_relacion": data["tipo_relacion"],
     "via_principal": data["via_principal"],
-    "fecha_ingreso_dato":data["fecha_ingreso_dato"]
+    "fecha_ingreso_dato":data["fecha_ingreso_dato"],
+    "notas":data["notas"]
 }
             datos_transformados = transformar_fechas( datos)
             agregar_a_google_sheets(datos_transformados)  # Agregar a Google Sheets
+            
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -298,6 +304,7 @@ class FormularioGoogleSheetsView(generics.CreateAPIView):
         # Enviar los datos a Google Sheets
         try:
             agregar_a_google_sheetsBotonGuardarBorrador(data)  # Llama a tu función para enviar datos a Google Sheets
+            agregar_a_google_sheetsBotonGuardarBorrador2(data)
             return Response({"message": "Datos enviados a Google Sheets correctamente"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": f"Error al enviar datos a Google Sheets: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
