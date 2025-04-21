@@ -1,3 +1,2 @@
-from django.db import models
-
-# Create your models here.
+from apps.areaPrivada.api.models.index import User
+from apps.areaPrivada.api.models.index import RegistroLlamada

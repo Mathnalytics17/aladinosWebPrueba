@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from apps.formulario.services import initialize_gspread
-
+from datetime import timedelta  # Añade esta importación al inicio de tu archivo
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -34,13 +34,14 @@ else:
 
 # Application definition
 
-INSTALLED_APPS = [ 'corsheaders',
-    'django.contrib.admin',
+INSTALLED_APPS = [ 'corsheaders','apps.areaPrivada','django_filters',
+   
     'django.contrib.auth',
+     'django.contrib.admin',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles','rest_framework','apps.areaPrivada','apps.formulario'
+    'django.contrib.staticfiles','rest_framework','apps.formulario'
 ]
 
 MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware',
@@ -52,6 +53,24 @@ MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+CORS_ALLOW_CREDENTIALS = True  # Permite el envío de credenciales (cookies, auth headers)
+
+SESSION_COOKIE_SAMESITE = 'None'  # Necesario para cross-site cookies
+SESSION_COOKIE_SECURE = True  # Solo enviar cookies sobre HTTPS (en producción)
+CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SECURE = True
+FRONTEND_URL='https://altasfundacionaladina.org'
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 ROOT_URLCONF = 'backend.urls'
 CORS_ALLOWED_ORIGINS = [
@@ -61,6 +80,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://www.altasfundacionaladina.org",
     "https://altasfundacionaladina.org",
     "http://82.112.250.23:3000",
+    
 ]
 
 
@@ -133,6 +153,28 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTH_USER_MODEL = 'areaPrivada.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
+}
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
+
+# Configuración de tokens
+EMAIL_VERIFICATION_TOKEN_EXPIRY_DAYS = 3  # Días de validez para verificación de email
+PASSWORD_RESET_TOKEN_EXPIRY_HOURS = 24  # Horas de validez para reseteo de contraseña
+
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.hostinger.com'  # Servidor SMTP de Hostinger

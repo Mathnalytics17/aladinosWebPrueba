@@ -24,5 +24,7 @@ urlpatterns = [
     path('api/validar_iban/', validar_iban, name='validar_iban'),
 
     path('api/validar-dni/', validar_dni, name='validar_dni'),
-
+    path('api/users/', include('apps.areaPrivada.api.routes.users.index')),
+  
+    path('api/llamadas/', include('apps.areaPrivada.api.routes.areaAministrador.index')),
 ]
