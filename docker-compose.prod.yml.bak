@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Configuraciones
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d/aladino.conf:/etc/nginx/conf.d/aladino.conf
+      
+      # Certificados SSL
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      
+      # Archivos estáticos (si los tienes)
+      - ./static:/usr/share/nginx/html/static
+      - ./media:/usr/share/nginx/html/media
+    depends_on:
+      - web
+      - daphne
+    restart: unless-stopped
+
+  web:
+    build: ./aladinosWebPrueba
+    command: gunicorn backend.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - ./aladinosWebPrueba:/usr/src/backend
+    expose:
+      - "8000"
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+
+  daphne:
+    build: ./aladinosWebPrueba
+    command: daphne --bind 0.0.0.0 -p 8002 backend.asgi:application
+    expose:
+      - "8002"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgresuser
+      - POSTGRES_PASSWORD=postgrespassword
+      - POSTGRES_DB=backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -28,14 +28,7 @@ def get_credentials() -> dict:
         "universe_domain": os.getenv("UNIVERSE_DOMAIN")
     }
 
-# Conectar con Google Sheets
 
-SPREADSHEET_NAME ="Formulario oficial F. Aladina"
-
-SPREAD_CLIENT = initialize_gspread()
-spreadsheet_list = SPREAD_CLIENT.openall()
-print([spread.title for spread in spreadsheet_list])
-SPREADSHEET = SPREAD_CLIENT.open(SPREADSHEET_NAME)
 
 def mapear_campos(data):
     """
@@ -84,6 +77,7 @@ def mapear_campos(data):
         "aceptacion_politica_privacidad": "Aceptación Política Privacidad",
         "aceptacion_socio": "Aceptación Socio",
         "tipo_relacion": "Tipo relación",
+        "notas":"notas",
     }
 
     return {mapeo[campo]: valor for campo, valor in data.items() if campo in mapeo}
@@ -98,8 +92,14 @@ def encontrar_primera_fila_vacia(hoja):
             return i + 1  # Las filas en gspread comienzan en 1
     return len(filas) + 1  # Si no hay filas vacías, devuelve la siguiente fila
 
-import gspread
-from gspread_formatting import *
+# Conectar con Google Sheets
+
+SPREADSHEET_NAME ="Formulario oficial F. Aladina"
+
+SPREAD_CLIENT = initialize_gspread()
+spreadsheet_list = SPREAD_CLIENT.openall()
+
+SPREADSHEET = SPREAD_CLIENT.open(SPREADSHEET_NAME)
 
 def agregar_a_google_sheets(data):
     """
@@ -116,7 +116,7 @@ def agregar_a_google_sheets(data):
         hoja = SPREADSHEET.add_worksheet(title=mes_actual, rows="1000", cols="1000")
         # Agregar encabezado
         encabezado = [
-            "Fecha ingreso", "Codigo Fundraiser", "Nombre Fundraiser", "Saludo", "Primer canal de captación", 
+           "Fecha ingreso","notas", "Codigo Fundraiser", "Nombre Fundraiser", "Saludo", "Primer canal de captación", 
             "Canal Entrada", "Nombre", "Apellidos", "Tipo de identificación", "N° identificación", 
             "Fecha Nacimiento", "Vía Principal", "CP de dirección principal", "Ciudad de dirección principal", 
             "Estado/Provincia de dirección principal", "Recibe Memoria", "Recibe Correspondencia", "Móvil", 
@@ -171,12 +171,12 @@ def agregar_a_google_sheets(data):
         print(f"⚠️ Advertencia: La columna 'Día Presentación' no existe en la hoja.")
         
         
-        
 
-import gspread
-from gspread_formatting import *
 
-def agregar_a_google_sheetsBotonGuardarBorrador(data):
+
+
+
+def agregar_a_google_sheetsBotonGuardarBorrador2(data):
     """
     Agrega datos a una hoja específica dentro del Google Sheet.
     Si la hoja del mes actual no existe, la crea con un encabezado.
@@ -191,7 +191,7 @@ def agregar_a_google_sheetsBotonGuardarBorrador(data):
         hoja = SPREADSHEET.add_worksheet(title=mes_actual, rows="1000", cols="1000")
         # Agregar encabezado
         encabezado = [
-            "Fecha ingreso", "Codigo Fundraiser", "Nombre Fundraiser", "Saludo", "Primer canal de captación", 
+            "Fecha ingreso", "notas","Codigo Fundraiser", "Nombre Fundraiser", "Saludo", "Primer canal de captación", 
             "Canal Entrada", "Nombre", "Apellidos", "Tipo de identificación", "N° identificación", 
             "Fecha Nacimiento", "Vía Principal", "CP de dirección principal", "Ciudad de dirección principal", 
             "Estado/Provincia de dirección principal", "Recibe Memoria", "Recibe Correspondencia", "Móvil", 
@@ -241,4 +241,4 @@ def agregar_a_google_sheetsBotonGuardarBorrador(data):
     rango_fila = f"{gspread.utils.rowcol_to_a1(primera_fila_vacia, 1)}:{gspread.utils.rowcol_to_a1(primera_fila_vacia, len(encabezados))}"
     # Aplicar el formato a toda la fila
     format_cell_range(hoja, rango_fila, formato_texto)
-    print(f"✅ Formato de texto rojo aplicado a la fila {primera_fila_vacia}.")
+    

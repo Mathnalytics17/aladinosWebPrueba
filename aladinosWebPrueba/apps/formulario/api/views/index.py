@@ -5,8 +5,10 @@ from rest_framework.response import Response
 from smtplib import SMTPException
 from rest_framework import status
 from django.core.mail import send_mail
+from rest_framework import viewsets
 #Models
 from apps.formulario.api.models.index import Formulario
+from apps.areaPrivada.api.models.users.index import Socio
 #Serializers
 from apps.formulario.api.serializers.index import FormularioSerializer
 from django.core.mail import EmailMessage
@@ -16,16 +18,21 @@ from xhtml2pdf import pisa
 from .ibanValidator.openibanlib import openiban
 from .ibanValidator.openibanlib.exceptions import IBANFormatValidationException
 #GOOGLE SHEETS
+from django.contrib.auth import get_user_model
 
-from apps.formulario.api.services.services import agregar_a_google_sheets,agregar_a_google_sheetsBotonGuardarBorrador
-    # views.py
+from apps.formulario.api.services.services import agregar_a_google_sheets,agregar_a_google_sheetsBotonGuardarBorrador2
+
+from apps.formulario.api.services.servicesGuardarFormulario import agregar_a_google_sheetsBotonGuardarBorrador
+
+
+# views.py
 import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from datetime import datetime
 from .pythonstdnum.stdnum.es import cif,nif,nie,postal_code
-
+User = get_user_model()
 def generar_pdf(html_template, context={}):
     html_string = render_to_string(html_template, context)
     result = BytesIO()
@@ -36,7 +43,7 @@ def generar_pdf(html_template, context={}):
     return result.getvalue()
 
 def enviar_correo_con_pdf(destinatario,registro):
-    print(registro)
+    
     pdf_content = generar_pdf("formpdf.html",  {
         'nombre': registro['nombre'],
         'apellidos': registro['apellidos'],
@@ -68,7 +75,7 @@ def enviar_correo_con_pdf(destinatario,registro):
         from_email="socios@altasfundacionaladina.org",
         to=[destinatario],
     )
-    email.attach("reporte.pdf", pdf_content, "application/pdf")
+    email.attach("Copia de Socio. Fundación Aladina.pdf", pdf_content, "application/pdf")
     email.send()
     return "Correo enviado correctamente"
 
@@ -104,7 +111,7 @@ class FormularioCreateView(generics.CreateAPIView):
     permission_classes = [AllowAny]
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
-        print(data)
+       
         dia = data.pop("dia", None)
         mes = data.pop("mes", None)
         anio = data.pop("anio", None)
@@ -113,6 +120,7 @@ class FormularioCreateView(generics.CreateAPIView):
         
         serializer = self.get_serializer(data=data)
         if serializer.is_valid():
+	    
             registro = serializer.save()
             # Enviar correo de notificación al administrador
             subject = f"Nuevo Alta de Socio: {registro.nombre} {registro.apellidos}"
@@ -169,7 +177,7 @@ class FormularioCreateView(generics.CreateAPIView):
                     return "Error al generar el PDF"
 
                 # Adjuntar el PDF al correo
-                email.attach("reporte.pdf", pdf_content, "application/pdf")
+                email.attach("Copia de Socio. Fundación Aladina.pdf", pdf_content, "application/pdf")
 
                 # Enviar el correo
                 email.send()
@@ -222,7 +230,7 @@ class FormularioCreateView(generics.CreateAPIView):
                     return "Error al generar el PDF"
 
                 # Adjuntar el PDF al correo
-                email.attach("reporte.pdf", pdf_content, "application/pdf")
+                email.attach("Copia de Socio. Fundación Aladina.pdf", pdf_content, "application/pdf")
 
                 # Enviar el correo
                 email.send()
@@ -271,10 +279,39 @@ class FormularioCreateView(generics.CreateAPIView):
     "tipo_pago": data["tipo_pago"],
     "tipo_relacion": data["tipo_relacion"],
     "via_principal": data["via_principal"],
-    "fecha_ingreso_dato":data["fecha_ingreso_dato"]
+    "fecha_ingreso_dato":data["fecha_ingreso_dato"],
+    "notas":data["notas"],
+    
 }
             datos_transformados = transformar_fechas( datos)
             agregar_a_google_sheets(datos_transformados)  # Agregar a Google Sheets
+         # Suponiendo que ya existe un usuario con rol COMERCIAL
+            fundraiser = User.objects.get(role='COMERCIAL', fundRaiserCode=data["fundraiser_code"])
+             # Crear el nuevo socio
+            fecha_creacion = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+           
+            socio = Socio.objects.create(
+                nombre_socio=data["nombre"],
+                apellido_socio=data["apellidos"],
+                genero_socio=data["genero"],
+                tipo_identificacion_socio=data["tipo_identificacion"],
+                numero_identificacion_socio=data["numero_identificacion"],
+                fecha_nacimiento=data["fecha_nacimiento"],
+                via_principal=data["via_principal"],
+                cp_direccion=data["cp_direccion"],
+                ciudad_direccion=data["ciudad_direccion"],
+                estado_provincia=data["estado_provincia"],
+                importe=float(data["importe"]),  # Convertir a float
+                periodicidad=data["periodicidad"],
+                dia_presentacion=data.get("dia_presentacion"),  # Valor por defecto 5
+                medio_pago=data["medio_pago"],
+                tipo_pago=data["tipo_pago"],
+                fundraiser=fundraiser,
+                primer_canal_captacion=data["primer_canal_captacion"],
+                canal_entrada=data["canal_entrada"],
+                fecha_creacion=fecha_creacion
+            )
+            
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -298,6 +335,7 @@ class FormularioGoogleSheetsView(generics.CreateAPIView):
         # Enviar los datos a Google Sheets
         try:
             agregar_a_google_sheetsBotonGuardarBorrador(data)  # Llama a tu función para enviar datos a Google Sheets
+            agregar_a_google_sheetsBotonGuardarBorrador2(data)
             return Response({"message": "Datos enviados a Google Sheets correctamente"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": f"Error al enviar datos a Google Sheets: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -367,3 +405,10 @@ def validar_iban(request):
             return JsonResponse({'valid': False, 'message': 'Formato de solicitud inválido'}, status=400)
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
+
+
+class FormularioViewSet(viewsets.ModelViewSet):
+    queryset = Formulario.objects.all()
+    serializer_class = FormularioSerializer
+    permission_classes = [AllowAny]  # Permite acceso sin autenticación

@@ -26,7 +26,8 @@ class Formulario(models.Model):
     TIPO_IDENTIFICACION_CHOICES = [
         ('NIF', 'NIF'),
         ('NIE', 'NIE'),
-        ('Pasaporte', 'Pasaporte')
+        ('Pasaporte', 'Pasaporte'),
+        ('CIF', 'CIF')
     ]
     tipo_identificacion = models.CharField(max_length=20, choices=TIPO_IDENTIFICACION_CHOICES,default='NIF')
     numero_identificacion = models.CharField(max_length=20)
@@ -70,6 +71,8 @@ class Formulario(models.Model):
     nombre_socio = models.CharField(max_length=255, blank=True, null=True)
     tipo_relacion = models.CharField(max_length=20, default='Socio')
     fecha_alta = models.DateField(blank=True, null=True)
+    # Sección: Notas
+    notas = models.TextField(blank=True, null=True, verbose_name="notas")
     
     def __str__(self):
         return f"{self.nombre} {self.apellidos}"
