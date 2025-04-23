@@ -14,7 +14,7 @@ services:
       # Certificados SSL
       - /etc/letsencrypt:/etc/letsencrypt:ro
       
-      # Archivos est√°ticos (si los tienes)
+      # Archivos est·ticos (si los tienes)
       - ./static:/usr/share/nginx/html/static
       - ./media:/usr/share/nginx/html/media
     depends_on:

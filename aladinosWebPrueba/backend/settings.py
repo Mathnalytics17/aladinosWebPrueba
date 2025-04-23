@@ -30,7 +30,7 @@ ALLOWED_HOSTS = ["*"]
 if DEBUG:
     WEBSITE_URL='http://localhost:8000'
 else:
-    WEBSITE_URL= "https://altasfundacionaladina.org/api"
+    WEBSITE_URL= "https://api.altasfundacionaladina.org/api/"
 
 # Application definition
 

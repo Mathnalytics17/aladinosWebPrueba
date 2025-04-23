@@ -43,7 +43,7 @@ def generar_pdf(html_template, context={}):
     return result.getvalue()
 
 def enviar_correo_con_pdf(destinatario,registro):
-    print(registro)
+    
     pdf_content = generar_pdf("formpdf.html",  {
         'nombre': registro['nombre'],
         'apellidos': registro['apellidos'],
@@ -111,7 +111,7 @@ class FormularioCreateView(generics.CreateAPIView):
     permission_classes = [AllowAny]
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
-        print(data)
+       
         dia = data.pop("dia", None)
         mes = data.pop("mes", None)
         anio = data.pop("anio", None)
@@ -120,6 +120,7 @@ class FormularioCreateView(generics.CreateAPIView):
         
         serializer = self.get_serializer(data=data)
         if serializer.is_valid():
+	    
             registro = serializer.save()
             # Enviar correo de notificación al administrador
             subject = f"Nuevo Alta de Socio: {registro.nombre} {registro.apellidos}"
@@ -288,6 +289,7 @@ class FormularioCreateView(generics.CreateAPIView):
             fundraiser = User.objects.get(role='COMERCIAL', fundRaiserCode=data["fundraiser_code"])
              # Crear el nuevo socio
             fecha_creacion = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+           
             socio = Socio.objects.create(
                 nombre_socio=data["nombre"],
                 apellido_socio=data["apellidos"],

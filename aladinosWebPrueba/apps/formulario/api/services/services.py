@@ -241,4 +241,4 @@ def agregar_a_google_sheetsBotonGuardarBorrador2(data):
     rango_fila = f"{gspread.utils.rowcol_to_a1(primera_fila_vacia, 1)}:{gspread.utils.rowcol_to_a1(primera_fila_vacia, len(encabezados))}"
     # Aplicar el formato a toda la fila
     format_cell_range(hoja, rango_fila, formato_texto)
-    print(f"✅ Formato de texto rojo aplicado a la fila {primera_fila_vacia}.")
+    
