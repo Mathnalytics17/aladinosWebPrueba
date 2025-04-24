@@ -59,7 +59,7 @@ SESSION_COOKIE_SAMESITE = 'None'  # Necesario para cross-site cookies
 SESSION_COOKIE_SECURE = True  # Solo enviar cookies sobre HTTPS (en producción)
 CSRF_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SECURE = True
-FRONTEND_URL='https://altasfundacionaladina.org/'
+FRONTEND_URL='https://www.altasfundacionaladina.org/'
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
