@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from ...views.users.index import (
     UserRegistrationView, CustomTokenObtainPairView,
     UserViewSet, EmailVerificationView,
-    PasswordResetRequestView, PasswordResetConfirmView,CurrentUserView,SocioViewSet,SocioDetailView,UserDetailView
+    PasswordResetRequestView, PasswordResetConfirmView,CurrentUserView,SocioViewSet,SocioDetailView,UserDetailView,FundraiserViewSet,FundraiserDetailView
 )
 urlpatterns = [
    path('', UserViewSet.as_view({'get': 'list'}), name='user-list'),
@@ -20,6 +20,11 @@ urlpatterns = [
     path('socio/', SocioViewSet.as_view({'get': 'list', 'post': 'create'}), name='socio-list'),
 
     path('socio/<int:pk>/', SocioDetailView.as_view(), name='socio-detail'),
-  
+    path('fundraisers/', FundraiserViewSet.as_view({
+        'get': 'list',
+        'post': 'create'
+    }), name='fundraiser-list'),
     
+    path('fundraisers/<int:pk>/', FundraiserDetailView.as_view(), name='fundraiser-detail'),
 ]
+    

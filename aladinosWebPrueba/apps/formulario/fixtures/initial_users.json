@@ -1,0 +1,70 @@
+[
+    {
+      "model": "areaPrivada.User",
+      "pk": 1,
+      "fields": {
+        "email": "jefe@example.com",
+        "first_name": "Luis",
+        "last_name": "Molina",
+        "is_active": true,
+        "email_verified": true,
+        "role": "JEFE",
+        "phone": "+34666555444",
+        "fundRaiserCode": "J001",
+        "password": "123456789Aladinas", 
+        "is_superuser": false,
+        "is_staff": true
+      }
+    },
+    {
+      "model": "areaPrivada.User",
+      "pk": 2,
+      "fields": {
+        "email": "david.torres@example.com",
+        "first_name": "David",
+        "last_name": "Torres Martín",
+        "is_active": true,
+        "email_verified": true,
+        "role": "COMERCIAL",
+        "phone": "+34611222333",
+        "fundRaiserCode": "2531",
+        "password": "123456789Aladinas",
+        "is_superuser": false,
+        "is_staff": false
+      }
+    },
+    {
+      "model": "areaPrivada.User",
+      "pk": 3,
+      "fields": {
+        "email": "diego.pulido@example.com",
+        "first_name": "Diego",
+        "last_name": "Pulido Marqués",
+        "is_active": true,
+        "email_verified": true,
+        "role": "COMERCIAL",
+        "phone": "+34622333444",
+        "fundRaiserCode": "2532",
+        "password": "123456789Aladinas",
+        "is_superuser": false,
+        "is_staff": false
+      }
+    },
+    {
+      "model":"areaPrivada.User",
+      "pk": 4,
+      "fields": {
+        "email": "selena.gangaramani@example.com",
+        "first_name": "Selena",
+        "last_name": "Gangaramani Godhwani",
+        "is_active": true,
+        "email_verified": true,
+        "role": "COMERCIAL",
+        "phone": "+34633444555",
+        "fundRaiserCode": "2535",
+        "password": "123456789Aladinas",
+        "is_superuser": false,
+        "is_staff": false
+      }
+    }
+  ]

@@ -1,0 +1,38 @@
+[
+    {
+      "model": "areaPrivada.Fundraiser",
+      "pk": 1,
+      "fields": {
+        "user": 2,
+        "first_name": "David",
+        "last_name": "Torres Martín",
+        "fundraiser_code": "2531",
+        "created_at": "2023-11-15T12:00:00Z",
+        "updated_at": "2023-11-15T12:00:00Z"
+      }
+    },
+    {
+      "model": "areaPrivada.Fundraiser",
+      "pk": 2,
+      "fields": {
+        "user": 3,
+        "first_name": "Diego",
+        "last_name": "Pulido Marqués",
+        "fundraiser_code": "2532",
+        "created_at": "2023-11-15T12:00:00Z",
+        "updated_at": "2023-11-15T12:00:00Z"
+      }
+    },
+    {
+      "model": "areaPrivada.Fundraiser",
+      "pk": 3,
+      "fields": {
+        "user": 4,
+        "first_name": "Selena",
+        "last_name": "Gangaramani Godhwani",
+        "fundraiser_code": "2535",
+        "created_at": "2023-11-15T12:00:00Z",
+        "updated_at": "2023-11-15T12:00:00Z"
+      }
+    }
+  ]

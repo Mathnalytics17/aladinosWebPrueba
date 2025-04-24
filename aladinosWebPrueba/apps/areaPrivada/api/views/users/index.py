@@ -6,7 +6,7 @@ from django.utils import timezone
 from rest_framework.views import APIView
 from django.conf import settings
 from django.core.mail import send_mail
-from apps.areaPrivada.api.models.users.index import EmailVerificationToken, PasswordResetToken,Socio
+from apps.areaPrivada.api.models.users.index import EmailVerificationToken, PasswordResetToken,Socio,Fundraiser
 from apps.areaPrivada.api.serializers.users.index import (
     UserRegistrationSerializer, 
     CustomTokenObtainPairSerializer,
@@ -14,7 +14,7 @@ from apps.areaPrivada.api.serializers.users.index import (
     ChangePasswordSerializer,
     EmailVerificationSerializer,
     PasswordResetRequestSerializer, 
-    PasswordResetConfirmSerializer,SocioSerializer,UserDetailSerializer
+    PasswordResetConfirmSerializer,SocioSerializer,UserDetailSerializer,FundraiserSerializer
 )
 from django.shortcuts import get_object_or_404
 from permissions import IsAdmin, IsJefe, IsComercial
@@ -386,3 +386,18 @@ class SocioDetailView(APIView):
 
 
 
+class FundraiserViewSet(viewsets.ModelViewSet):
+    queryset = Fundraiser.objects.all()
+    serializer_class = FundraiserSerializer
+    permission_classes = [permissions.AllowAny]  # Requiere autenticación
+
+
+
+
+class FundraiserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Fundraiser.objects.all()
+    serializer_class = FundraiserSerializer
+    permission_classes = [permissions.AllowAny]
+    lookup_field = 'pk'
+
+  

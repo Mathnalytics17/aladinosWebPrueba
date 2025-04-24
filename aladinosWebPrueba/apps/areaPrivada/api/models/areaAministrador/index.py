@@ -8,7 +8,7 @@ class RegistroLlamada(models.Model):
     fundraiser = models.ForeignKey(User, on_delete=models.CASCADE)  # o tu modelo personalizado
     numero_de_llamada = models.IntegerField(default=1)
     resultado = models.CharField(max_length=100)
-    notas = models.TextField()
+    notas = models.TextField(null=True, blank=True)
     fecha_hora = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

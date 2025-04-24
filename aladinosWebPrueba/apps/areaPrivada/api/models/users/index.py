@@ -69,6 +69,26 @@ class User(AbstractUser):
     def __str__(self):
         return self.email
 
+    def save(self, *args, **kwargs):
+        """
+        Sobrescribe el método save para crear automáticamente
+        un fundraiser cuando se crea un usuario COMERCIAL
+        """
+        is_new = not self.pk  # Verifica si es un nuevo usuario (no tiene ID aún)
+        
+        # Guarda primero el usuario
+        super().save(*args, **kwargs)
+        
+        # Solo para nuevos usuarios COMERCIALES con fundRaiserCode
+        if is_new and self.role == self.Role.COMERCIAL and self.fundRaiserCode:
+            from apps.areaPrivada.api.models.users.index import Fundraiser  # Importación local para evitar circular imports
+            Fundraiser.objects.create(
+                user=self,
+                first_name=self.first_name,
+                last_name=self.last_name,
+                fundraiser_code=self.fundRaiserCode
+            )
+
     def email_user(self, subject, message, from_email=None, **kwargs):
         """Send an email to this user."""
         send_mail(subject, message, from_email, [self.email], **kwargs)
@@ -99,29 +119,33 @@ User = get_user_model()
 class Socio(models.Model):
     # Información personal
     fecha_creacion = models.DateTimeField(blank=True, null=True)
-    nombre_socio = models.CharField(max_length=100)
-    apellido_socio = models.CharField(max_length=100)
-    genero_socio = models.CharField(max_length=10)
+    nombre_socio = models.CharField(max_length=100, blank=True, null=True)
+    apellido_socio = models.CharField(max_length=100, blank=True, null=True)
+    genero_socio = models.CharField(max_length=10, blank=True, null=True)
+    no_iban = models.CharField(max_length=200, blank=True, null=True)
     
     # Identificación
-    tipo_identificacion_socio = models.CharField(max_length=20)
-    numero_identificacion_socio = models.CharField(max_length=20)
-    fecha_nacimiento = models.DateField()
+    tipo_identificacion_socio = models.CharField(max_length=20, blank=True, null=True)
+    numero_identificacion_socio = models.CharField(max_length=20, blank=True, null=True)
+    fecha_nacimiento = models.DateField(blank=True, null=True)
+    telefono_socio = models.CharField(max_length=200, blank=True, null=True)
+    email_socio = models.EmailField(max_length=100, blank=True, null=True)
+    fecha_alta_real = models.DateField(blank=True, null=True)
     
     # Dirección
-    via_principal = models.CharField(max_length=255)
-    cp_direccion = models.CharField(max_length=10)
-    ciudad_direccion = models.CharField(max_length=100)
-    estado_provincia = models.CharField(max_length=100)
+    via_principal = models.CharField(max_length=255, blank=True, null=True)
+    cp_direccion = models.CharField(max_length=10, blank=True, null=True)
+    ciudad_direccion = models.CharField(max_length=100, blank=True, null=True)
+    estado_provincia = models.CharField(max_length=100, blank=True, null=True)
     
     # Información de pago
-    importe = models.DecimalField(max_digits=10, decimal_places=2)
-    periodicidad = models.CharField(max_length=20)
-    dia_presentacion = models.CharField(default="1", max_length=255)
-    medio_pago = models.CharField(max_length=20)
-    tipo_pago = models.CharField(max_length=20)
+    importe = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    periodicidad = models.CharField(max_length=20, blank=True, null=True)
+    dia_presentacion = models.CharField(default="1", max_length=255, blank=True, null=True)
+    medio_pago = models.CharField(max_length=20, blank=True, null=True)
+    tipo_pago = models.CharField(max_length=20, blank=True, null=True)
     
-    # Relación con fundraiser (usuario COMERCIAL)
+    # Relación con fundraiser
     fundraiser = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -132,18 +156,20 @@ class Socio(models.Model):
     )
     
     # Información de captación
-    primer_canal_captacion = models.CharField(max_length=100)
-    canal_entrada = models.CharField(max_length=50)
+    primer_canal_captacion = models.CharField(max_length=100, blank=True, null=True)
+    canal_entrada = models.CharField(max_length=50, blank=True, null=True)
     
     # Metadata
     fecha_alta = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
     activo = models.BooleanField(default=True)
-    status=models.CharField(default='Pendiente',max_length=255)
-    devolucion=models.BooleanField(default=False)
-    telefono=models.CharField(max_length=20, blank=True)
-    no_llamadas=models.IntegerField(default=0)
-    fecha_verificacion=models.DateTimeField(null=True, blank=True)
+    status = models.CharField(default='Pendiente', max_length=255, blank=True, null=True)
+    devolucion = models.BooleanField(default=False)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    no_llamadas = models.IntegerField(default=0)
+    fecha_verificacion = models.DateTimeField(null=True, blank=True)
+    is_borrador = models.BooleanField(default=False)
+
     class Meta:
         verbose_name = 'Socio'
         verbose_name_plural = 'Socios'
@@ -156,3 +182,29 @@ class Socio(models.Model):
 
     def __str__(self):
         return f"{self.nombre_socio} {self.apellido_socio} ({self.numero_identificacion_socio})"
+
+
+class Fundraiser(models.Model):
+    user = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        related_name='fundraisers',
+        verbose_name='Usuario asociado'
+    )
+    first_name = models.CharField(max_length=100, verbose_name='Nombre')
+    last_name = models.CharField(max_length=100, verbose_name='Apellido')
+    fundraiser_code = models.CharField(
+        max_length=20, 
+        unique=True,
+        verbose_name='Código de fundraiser'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Fundraiser'
+        verbose_name_plural = 'Fundraisers'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.fundraiser_code})"

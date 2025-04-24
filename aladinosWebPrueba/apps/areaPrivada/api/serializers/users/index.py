@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from apps.areaPrivada.api.models.users.index  import EmailVerificationToken, PasswordResetToken,Socio
+from apps.areaPrivada.api.models.users.index  import EmailVerificationToken, PasswordResetToken,Socio,Fundraiser
 import uuid
 from datetime import datetime, timedelta
 from django.conf import settings
@@ -151,3 +151,17 @@ class SocioSerializer(serializers.ModelSerializer):
         rep['fundraiser'] = rep.pop('fundraiser_data', None)
         return rep
 
+class FundraiserSerializer(serializers.ModelSerializer):
+    # Muestra el username del usuario en lugar del ID
+    user = serializers.SlugRelatedField(
+        slug_field='id',
+        queryset=User.objects.all()
+    )
+
+    class Meta:
+        model = Fundraiser
+        fields = '__all__'
+        read_only_fields = ('created_at', 'updated_at')
+        extra_kwargs = {
+            'fundraiser_code': {'required': True},
+        }

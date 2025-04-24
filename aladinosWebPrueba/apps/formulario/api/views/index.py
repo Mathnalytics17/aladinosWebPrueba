@@ -309,17 +309,23 @@ class FormularioCreateView(generics.CreateAPIView):
                 fundraiser=fundraiser,
                 primer_canal_captacion=data["primer_canal_captacion"],
                 canal_entrada=data["canal_entrada"],
-                fecha_creacion=fecha_creacion
+                fecha_creacion=fecha_creacion,
+                is_borrador=data["is_borrador"],
+                no_iban=data["no_iban"],
+                telefono_socio=data["movil"],
+                email_socio=data["correo_electronico"],
             )
             
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-
+from datetime import datetime
 class FormularioGoogleSheetsView(generics.CreateAPIView):
     permission_classes = [AllowAny]
-
+    queryset = Formulario.objects.all()
+    serializer_class = FormularioSerializer
+    
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
 
@@ -327,13 +333,20 @@ class FormularioGoogleSheetsView(generics.CreateAPIView):
         dia = data.pop("dia", None)
         mes = data.pop("mes", None)
         anio = data.pop("anio", None)
+        data2=data
         if dia and mes and anio:
             data["fecha_nacimiento"] = f"{anio}-{mes.zfill(2)}-{dia.zfill(2)}"
-
-        # Aquí puedes agregar validaciones adicionales si lo necesitas
-
-        # Enviar los datos a Google Sheets
         try:
+            fecha_original = data["fecha_nacimiento"]
+            fecha_convertida = datetime.strptime(fecha_original, "%d/%m/%Y").strftime("%Y-%m-%d")
+            data2["fecha_nacimiento"] = fecha_convertida
+        except ValueError:
+            data2["fecha_nacimiento"] = data["fecha_nacimiento"]
+            
+        serializer = self.get_serializer(data=data2)
+        try:
+            serializer.is_valid(raise_exception=True)
+            registro = serializer.save()  # Esto guarda en la base de datos
             agregar_a_google_sheetsBotonGuardarBorrador(data)  # Llama a tu función para enviar datos a Google Sheets
             agregar_a_google_sheetsBotonGuardarBorrador2(data)
             return Response({"message": "Datos enviados a Google Sheets correctamente"}, status=status.HTTP_200_OK)
