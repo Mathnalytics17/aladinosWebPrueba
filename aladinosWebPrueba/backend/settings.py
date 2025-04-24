@@ -183,7 +183,7 @@ EMAIL_USE_SSL = True  # Si usas el puerto 465, usa SSL
 EMAIL_USE_TLS = False  # TLS solo si usas el puerto 587
 EMAIL_HOST_USER = get_env('EMAIL_HOST_USER')  # Tu correo en Hostinger
 EMAIL_HOST_PASSWORD = get_env('EMAIL_HOST_PASSWORD')  # La contraseña del correo
-
+DEFAULT_FROM_EMAIL = get_env('EMAIL_HOST_USER')
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
