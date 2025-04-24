@@ -347,6 +347,35 @@ class FormularioGoogleSheetsView(generics.CreateAPIView):
         try:
             serializer.is_valid(raise_exception=True)
             registro = serializer.save()  # Esto guarda en la base de datos
+            fundraiser = User.objects.get(role='COMERCIAL', fundRaiserCode=data["fundraiser_code"])
+             # Crear el nuevo socio
+            fecha_creacion = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+           
+            socio = Socio.objects.create(
+                nombre_socio=data["nombre"],
+                apellido_socio=data["apellidos"],
+                genero_socio=data["genero"],
+                tipo_identificacion_socio=data["tipo_identificacion"],
+                numero_identificacion_socio=data["numero_identificacion"],
+                fecha_nacimiento=data["fecha_nacimiento"],
+                via_principal=data["via_principal"],
+                cp_direccion=data["cp_direccion"],
+                ciudad_direccion=data["ciudad_direccion"],
+                estado_provincia=data["estado_provincia"],
+                importe=float(data["importe"]),  # Convertir a float
+                periodicidad=data["periodicidad"],
+                dia_presentacion=data.get("dia_presentacion"),  # Valor por defecto 5
+                medio_pago=data["medio_pago"],
+                tipo_pago=data["tipo_pago"],
+                fundraiser=fundraiser,
+                primer_canal_captacion=data["primer_canal_captacion"],
+                canal_entrada=data["canal_entrada"],
+                fecha_creacion=fecha_creacion,
+                is_borrador=data["is_borrador"],
+                no_iban=data["no_iban"],
+                telefono_socio=data["movil"],
+                email_socio=data["correo_electronico"],
+            )
             agregar_a_google_sheetsBotonGuardarBorrador(data)  # Llama a tu función para enviar datos a Google Sheets
             agregar_a_google_sheetsBotonGuardarBorrador2(data)
             return Response({"message": "Datos enviados a Google Sheets correctamente"}, status=status.HTTP_200_OK)
