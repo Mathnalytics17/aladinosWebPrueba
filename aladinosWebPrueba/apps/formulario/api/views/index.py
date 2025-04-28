@@ -329,59 +329,75 @@ class FormularioGoogleSheetsView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
 
-        # Transformar las fechas si es necesario (esto es opcional, dependiendo de tu lógica)
-        dia = data.pop("dia", None)
-        mes = data.pop("mes", None)
-        anio = data.pop("anio", None)
-        data2=data
-        if dia and mes and anio:
-            data["fecha_nacimiento"] = f"{anio}-{mes.zfill(2)}-{dia.zfill(2)}"
-        try:
-            fecha_original = data["fecha_nacimiento"]
-            fecha_convertida = datetime.strptime(fecha_original, "%d/%m/%Y").strftime("%Y-%m-%d")
-            data2["fecha_nacimiento"] = fecha_convertida
-        except ValueError:
-            data2["fecha_nacimiento"] = data["fecha_nacimiento"]
-            
-        serializer = self.get_serializer(data=data2)
+        # Manejo seguro de la fecha de nacimiento
+        fecha_nacimiento = data.get("fecha_nacimiento")
+        
+        if fecha_nacimiento:
+            try:
+                # Intenta parsear en formato YYYY-MM-DD
+                datetime.strptime(fecha_nacimiento, "%Y-%m-%d")
+            except ValueError:
+                try:
+                    # Intenta parsear en formato DD/MM/YYYY
+                    fecha_obj = datetime.strptime(fecha_nacimiento, "%d/%m/%Y")
+                    data["fecha_nacimiento"] = fecha_obj.strftime("%Y-%m-%d")
+                except ValueError:
+                    # Si no puede parsear, elimina el campo para que no falle la validación
+                    del data["fecha_nacimiento"]
+        else:
+            # Si no viene fecha, la eliminamos del data para que no falle
+            if "fecha_nacimiento" in data:
+                del data["fecha_nacimiento"]
+
+        serializer = self.get_serializer(data=data)
+        
         try:
             serializer.is_valid(raise_exception=True)
-            registro = serializer.save()  # Esto guarda en la base de datos
-            fundraiser = User.objects.get(role='COMERCIAL', fundRaiserCode=data["fundraiser_code"])
-             # Crear el nuevo socio
-            fecha_creacion = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-           
-            socio = Socio.objects.create(
-                nombre_socio=data["nombre"],
-                apellido_socio=data["apellidos"],
-                genero_socio=data["genero"],
-                tipo_identificacion_socio=data["tipo_identificacion"],
-                numero_identificacion_socio=data["numero_identificacion"],
-                fecha_nacimiento=data["fecha_nacimiento"],
-                via_principal=data["via_principal"],
-                cp_direccion=data["cp_direccion"],
-                ciudad_direccion=data["ciudad_direccion"],
-                estado_provincia=data["estado_provincia"],
-                importe=float(data["importe"]),  # Convertir a float
-                periodicidad=data["periodicidad"],
-                dia_presentacion=data.get("dia_presentacion"),  # Valor por defecto 5
-                medio_pago=data["medio_pago"],
-                tipo_pago=data["tipo_pago"],
-                fundraiser=fundraiser,
-                primer_canal_captacion=data["primer_canal_captacion"],
-                canal_entrada=data["canal_entrada"],
-                fecha_creacion=fecha_creacion,
-                is_borrador=data["is_borrador"],
-                no_iban=data["no_iban"],
-                telefono_socio=data["movil"],
-                email_socio=data["correo_electronico"],
-            )
-            agregar_a_google_sheetsBotonGuardarBorrador(data)  # Llama a tu función para enviar datos a Google Sheets
-            agregar_a_google_sheetsBotonGuardarBorrador2(data)
-            return Response({"message": "Datos enviados a Google Sheets correctamente"}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": f"Error al enviar datos a Google Sheets: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            registro = serializer.save()
+            
+            # Solo crear socio si no es borrador
+            if not data.get("is_borrador", True):
+                fundraiser = User.objects.get(role='COMERCIAL', fundRaiserCode=data["fundraiser_code"])
+                fecha_creacion = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+               
+                socio = Socio.objects.create(
+                    nombre_socio=data["nombre"],
+                    apellido_socio=data["apellidos"],
+                    genero_socio=data["genero"],
+                    tipo_identificacion_socio=data["tipo_identificacion"],
+                    numero_identificacion_socio=data["numero_identificacion"],
+                    fecha_nacimiento=data.get("fecha_nacimiento"),  # Puede ser None
+                    via_principal=data["via_principal"],
+                    cp_direccion=data["cp_direccion"],
+                    ciudad_direccion=data["ciudad_direccion"],
+                    estado_provincia=data["estado_provincia"],
+                    importe=float(data["importe"]),
+                    periodicidad=data["periodicidad"],
+                    dia_presentacion=data.get("dia_presentacion", 5),
+                    medio_pago=data["medio_pago"],
+                    tipo_pago=data["tipo_pago"],
+                    fundraiser=fundraiser,
+                    primer_canal_captacion=data["primer_canal_captacion"],
+                    canal_entrada=data["canal_entrada"],
+                    fecha_creacion=fecha_creacion,
+                    is_borrador=data.get("is_borrador", False),
+                    no_iban=data["no_iban"],
+                    telefono_socio=data["movil"],
+                    email_socio=data.get("correo_electronico", ""),
+                )
 
+            # Enviar a Google Sheets
+            if data.get("is_borrador", False):
+                agregar_a_google_sheetsBotonGuardarBorrador(data)
+            else:
+                agregar_a_google_sheetsBotonGuardarBorrador2(data)
+                
+            return Response({"message": "Datos procesados correctamente"}, status=status.HTTP_200_OK)
+            
+        except User.DoesNotExist:
+            return Response({"error": "Fundraiser no encontrado"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": f"Error al procesar los datos: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @csrf_exempt  # Desactiva la protección CSRF para esta vista (solo para desarrollo)
 def validar_dni(request):
     if request.method == 'POST':
