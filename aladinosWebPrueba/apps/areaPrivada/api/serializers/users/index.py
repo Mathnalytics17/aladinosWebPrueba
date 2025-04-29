@@ -9,8 +9,13 @@ import uuid
 from datetime import datetime, timedelta
 from django.conf import settings
 from rest_framework import serializers
+from django.core.mail import send_mail
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
 
-
+import uuid
+from django.utils import timezone
+from datetime import timedelta
 
 User = get_user_model()
 
@@ -104,25 +109,88 @@ class ChangePasswordSerializer(serializers.Serializer):
 class EmailVerificationSerializer(serializers.Serializer):
     token = serializers.UUIDField()
 
+
+
+User = get_user_model()
+
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
-
-class PasswordResetConfirmSerializer(serializers.Serializer):
-    token = serializers.UUIDField()
-    new_password = serializers.CharField()
-    new_password2 = serializers.CharField()
-
-    def validate(self, attrs):
-        if attrs['new_password'] != attrs['new_password2']:
-            raise serializers.ValidationError({"new_password": "Password fields didn't match."})
-
-        try:
-            validate_password(attrs['new_password'])
-        except exceptions.ValidationError as e:
-            raise serializers.ValidationError({'new_password': list(e.messages)})
-
-        return attrs
     
+    def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("No existe un usuario con este email")
+        return value
+
+    def create(self, validated_data):
+        user = User.objects.get(email=validated_data['email'])
+        
+        # Invalidar tokens previos
+        PasswordResetToken.objects.filter(user=user).delete()
+        
+        # Crear nuevo token
+        token = PasswordResetToken.objects.create(
+            user=user,
+            expires_at=timezone.now() + timedelta(hours=24)
+        )
+        
+        # Aquí deberías enviar el email (implementar esta parte)
+        self.send_reset_email(user, token)
+        
+        return {'message': 'Se ha enviado un email con instrucciones'}
+
+    def send_reset_email(self, user, token):
+         # Eliminar tokens previos si existen
+            PasswordResetToken.objects.filter(user=user).delete()
+            
+            expires_at = timezone.now() + timedelta(days=settings.EMAIL_VERIFICATION_TOKEN_EXPIRY_DAYS)
+            token = PasswordResetToken.objects.create(
+                user=user,
+                expires_at=expires_at
+            )
+            reset_url = f"{settings.FRONTEND_URL}/areaPrivada/users/resetPassword?token={token.token}"
+           
+            subject = "Cambia tu password"
+            message = f"""
+            Hola {user.get_full_name() or user.email},
+            
+            Por favor haz clic en el siguiente enlace para verificar tu correo:
+            { reset_url}
+            
+            Este enlace expirará en {settings.EMAIL_VERIFICATION_TOKEN_EXPIRY_DAYS} días.
+            
+            Si no solicitaste este registro, ignora este mensaje.
+            """
+            
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+            
+            print(f"Email de recuperación enviado a {user.email}: {reset_url}")  # Solo para desarrollo
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    new_password = serializers.CharField(min_length=8, write_only=True)
+    new_password2 = serializers.CharField(min_length=8, write_only=True)
+
+    def validate(self, data):
+        # Validar formato UUID
+        try:
+            uuid.UUID(data['token'])
+        except ValueError:
+            raise serializers.ValidationError({
+                'token': 'Formato de token inválido'
+            })
+        
+        # Validar coincidencia de contraseñas
+        if data['new_password'] != data['new_password2']:
+            raise serializers.ValidationError({
+                'new_password2': 'Las contraseñas no coinciden'
+            })
+            
+        return data
 
 
 class UserSerializer(serializers.ModelSerializer):

@@ -201,57 +201,15 @@ class EmailVerificationView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-class PasswordResetRequestView(generics.GenericAPIView):
-    """
-    Vista para solicitar reseteo de contraseña
-    """
-    serializer_class = PasswordResetRequestSerializer
+class ForgotPasswordView(APIView):
     permission_classes = [permissions.AllowAny]
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        email = serializer.validated_data['email']
-        try:
-            user = User.objects.get(email=email)
-            
-            # Eliminar tokens previos
-            PasswordResetToken.objects.filter(user=user).delete()
-            
-            expires_at = timezone.now() + timedelta(hours=settings.PASSWORD_RESET_TOKEN_EXPIRY_HOURS)
-            token = PasswordResetToken.objects.create(
-                user=user,
-                expires_at=expires_at
-            )
-            
-            reset_url = f"{settings.FRONTEND_URL}/auth/reset-password/{token.token}/"
-            subject = "Restablecer tu contraseña"
-            message = f"""
-            Hola {user.get_full_name() or user.email},
-            
-            Para restablecer tu contraseña, haz clic en el siguiente enlace:
-            {reset_url}
-            
-            Este enlace expirará en {settings.PASSWORD_RESET_TOKEN_EXPIRY_HOURS} horas.
-            
-            Si no solicitaste este cambio, ignora este mensaje.
-            """
-            
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=False,
-            )
-            
-            return Response({"status": "Email de recuperación enviado"})
-            
-        except User.DoesNotExist:
-            # No revelar que el email no existe por seguridad
-            return Response({"status": "Si el email existe, se ha enviado un enlace de recuperación"})
-
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            result = serializer.create(serializer.validated_data)
+            return Response(result, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+import uuid
 class PasswordResetConfirmView(generics.GenericAPIView):
     """
     Vista para confirmar reseteo de contraseña con token
@@ -261,10 +219,21 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
         
         try:
-            token = PasswordResetToken.objects.get(token=serializer.validated_data['token'])
+            serializer.is_valid(raise_exception=True)
+            token_str = serializer.validated_data['token']
+            
+            try:
+                token_uuid = uuid.UUID(token_str)
+            except ValueError:
+                return Response(
+                    {"detail": "Formato de token inválido"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            token = PasswordResetToken.objects.get(token=token_uuid)
+            
             if not token.is_valid():
                 return Response(
                     {"detail": "El enlace de recuperación ha expirado"},
@@ -274,20 +243,27 @@ class PasswordResetConfirmView(generics.GenericAPIView):
             user = token.user
             user.set_password(serializer.validated_data['new_password'])
             user.save()
+            
+            # Eliminar token de reset
             token.delete()
             
-            # Invalidar todos los tokens de sesión
-            user.auth_token_set.all().delete()
-            
-            return Response({"status": "Contraseña restablecida correctamente"})
+           
+            return Response(
+                {"status": "Contraseña restablecida correctamente"},
+                status=status.HTTP_200_OK
+            )
             
         except PasswordResetToken.DoesNotExist:
             return Response(
                 {"detail": "Token de recuperación inválido"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-
+        except Exception as e:
+            print(f"Error en PasswordResetConfirmView: {str(e)}")
+            return Response(
+                {"detail": "Error interno del servidor"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 User = get_user_model()
 
 class CurrentUserView(RetrieveAPIView):
