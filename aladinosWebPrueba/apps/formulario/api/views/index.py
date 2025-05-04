@@ -241,48 +241,48 @@ class FormularioCreateView(generics.CreateAPIView):
             except Exception as e:
                 print(f"Error inesperado: {e}")
             datos = {
-    "apellidos": data["apellidos"],
-    "canal_entrada": data["canal_entrada"],
-    "ciudad_direccion": data["ciudad_direccion"],
-    "concepto_recibo": data["concepto_recibo"],
-    "correo_electronico": data["correo_electronico"],
-    "cp_direccion": data["cp_direccion"],
-    
-    "descripcion": data["descripcion"],
-    "dia_presentacion": data["dia_presentacion"],
-    "estado_provincia": data["estado_provincia"],
-    "fecha_alta": data["fecha_alta"],
-    "fecha_nacimiento": data["fecha_nacimiento"],
-    "fundraiser_code": data["fundraiser_code"],
-    "fundraiser_name": data["fundraiser_name"],
-    "genero": data["genero"],
-    
-    "importe": data["importe"],
-    "mandato": data["mandato"],
-    "medio_pago": data["medio_pago"],
-    "movil": data["movil"],
-    "no_iban": data["no_iban"],
-    "nombre": data["nombre"],
-    "nombre_asterisco": data["nombre_asterisco"],
-    "nombre_autom": data["nombre_autom"],
-   
-    "numero_identificacion": data["numero_identificacion"],
-    "otra_cantidad": data["otra_cantidad"],
-    "periodicidad": data["periodicidad"],
-    "persona_id": data["persona_id"],
-    "primer_canal_captacion": data["primer_canal_captacion"],
-    "recibe_correspondencia": data["recibe_correspondencia"],
-    "recibe_memoria": data["recibe_memoria"],
-    "saludo": data["saludo"],
-    "telefono_casa": data["telefono_casa"],
-    "tipo_identificacion": data["tipo_identificacion"],
-    "tipo_pago": data["tipo_pago"],
-    "tipo_relacion": data["tipo_relacion"],
-    "via_principal": data["via_principal"],
-    "fecha_ingreso_dato":data["fecha_ingreso_dato"],
-    "notas":data["notas"],
-    
-}
+                    "apellidos": data["apellidos"],
+                    "canal_entrada": data["canal_entrada"],
+                    "ciudad_direccion": data["ciudad_direccion"],
+                    "concepto_recibo": data["concepto_recibo"],
+                    "correo_electronico": data["correo_electronico"],
+                    "cp_direccion": data["cp_direccion"],
+                    
+                    "descripcion": data["descripcion"],
+                    "dia_presentacion": data["dia_presentacion"],
+                    "estado_provincia": data["estado_provincia"],
+                    "fecha_alta": data["fecha_alta"],
+                    "fecha_nacimiento": data["fecha_nacimiento"],
+                    "fundraiser_code": data["fundraiser_code"],
+                    "fundraiser_name": data["fundraiser_name"],
+                    "genero": data["genero"],
+                    
+                    "importe": data["importe"],
+                    "mandato": data["mandato"],
+                    "medio_pago": data["medio_pago"],
+                    "movil": data["movil"],
+                    "no_iban": data["no_iban"],
+                    "nombre": data["nombre"],
+                    "nombre_asterisco": data["nombre_asterisco"],
+                    "nombre_autom": data["nombre_autom"],
+                
+                    "numero_identificacion": data["numero_identificacion"],
+                    "otra_cantidad": data["otra_cantidad"],
+                    "periodicidad": data["periodicidad"],
+                    "persona_id": data["persona_id"],
+                    "primer_canal_captacion": data["primer_canal_captacion"],
+                    "recibe_correspondencia": data["recibe_correspondencia"],
+                    "recibe_memoria": data["recibe_memoria"],
+                    "saludo": data["saludo"],
+                    "telefono_casa": data["telefono_casa"],
+                    "tipo_identificacion": data["tipo_identificacion"],
+                    "tipo_pago": data["tipo_pago"],
+                    "tipo_relacion": data["tipo_relacion"],
+                    "via_principal": data["via_principal"],
+                    "fecha_ingreso_dato":data["fecha_ingreso_dato"],
+                    "notas":data["notas"],
+                    
+                }
             datos_transformados = transformar_fechas( datos)
             agregar_a_google_sheets(datos_transformados)  # Agregar a Google Sheets
          # Suponiendo que ya existe un usuario con rol COMERCIAL
@@ -355,42 +355,40 @@ class FormularioGoogleSheetsView(generics.CreateAPIView):
             serializer.is_valid(raise_exception=True)
             registro = serializer.save()
             
-            # Solo crear socio si no es borrador
-            if not data.get("is_borrador", True):
-                fundraiser = User.objects.get(role='COMERCIAL', fundRaiserCode=data["fundraiser_code"])
-                fecha_creacion = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-               
-                socio = Socio.objects.create(
-                    nombre_socio=data["nombre"],
-                    apellido_socio=data["apellidos"],
-                    genero_socio=data["genero"],
-                    tipo_identificacion_socio=data["tipo_identificacion"],
-                    numero_identificacion_socio=data["numero_identificacion"],
-                    fecha_nacimiento=data.get("fecha_nacimiento"),  # Puede ser None
-                    via_principal=data["via_principal"],
-                    cp_direccion=data["cp_direccion"],
-                    ciudad_direccion=data["ciudad_direccion"],
-                    estado_provincia=data["estado_provincia"],
-                    importe=float(data["importe"]),
-                    periodicidad=data["periodicidad"],
-                    dia_presentacion=data.get("dia_presentacion", 5),
-                    medio_pago=data["medio_pago"],
-                    tipo_pago=data["tipo_pago"],
-                    fundraiser=fundraiser,
-                    primer_canal_captacion=data["primer_canal_captacion"],
-                    canal_entrada=data["canal_entrada"],
-                    fecha_creacion=fecha_creacion,
-                    is_borrador=data.get("is_borrador", False),
-                    no_iban=data["no_iban"],
-                    telefono_socio=data["movil"],
-                    email_socio=data.get("correo_electronico", ""),
-                )
+           
+            fundraiser = User.objects.get(role='COMERCIAL', fundRaiserCode=data["fundraiser_code"])
+            fecha_creacion = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            socio = Socio.objects.create(
+                nombre_socio=data["nombre"],
+                apellido_socio=data["apellidos"],
+                genero_socio=data["genero"],
+                tipo_identificacion_socio=data["tipo_identificacion"],
+                numero_identificacion_socio=data["numero_identificacion"],
+                fecha_nacimiento=data.get("fecha_nacimiento"),  # Puede ser None
+                via_principal=data["via_principal"],
+                cp_direccion=data["cp_direccion"],
+                ciudad_direccion=data["ciudad_direccion"],
+                estado_provincia=data["estado_provincia"],
+                importe=float(data["importe"]),
+                periodicidad=data["periodicidad"],
+                dia_presentacion=data.get("dia_presentacion", 5),
+                medio_pago=data["medio_pago"],
+                tipo_pago=data["tipo_pago"],
+                fundraiser=fundraiser,
+                primer_canal_captacion=data["primer_canal_captacion"],
+                canal_entrada=data["canal_entrada"],
+                fecha_creacion=fecha_creacion,
+                is_borrador=data.get("is_borrador", False),
+                no_iban=data["no_iban"],
+                telefono_socio=data["movil"],
+                email_socio=data.get("correo_electronico", ""),
+            )
 
-            # Enviar a Google Sheets
-            if data.get("is_borrador", False):
-                agregar_a_google_sheetsBotonGuardarBorrador(data)
-            else:
-                agregar_a_google_sheetsBotonGuardarBorrador2(data)
+        
+            agregar_a_google_sheetsBotonGuardarBorrador(data)
+        
+            agregar_a_google_sheetsBotonGuardarBorrador2(data)
                 
             return Response({"message": "Datos procesados correctamente"}, status=status.HTTP_200_OK)
             
