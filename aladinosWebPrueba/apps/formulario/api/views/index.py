@@ -289,7 +289,10 @@ class FormularioCreateView(generics.CreateAPIView):
             fundraiser = User.objects.get(role='COMERCIAL', fundRaiserCode=data["fundraiser_code"])
              # Crear el nuevo socio
             fecha_creacion = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-           
+            try:
+                importe = float(data["importe"])
+            except (KeyError, ValueError, TypeError):
+                importe = 0
             socio = Socio.objects.create(
                 nombre_socio=data["nombre"],
                 apellido_socio=data["apellidos"],
@@ -301,7 +304,7 @@ class FormularioCreateView(generics.CreateAPIView):
                 cp_direccion=data["cp_direccion"],
                 ciudad_direccion=data["ciudad_direccion"],
                 estado_provincia=data["estado_provincia"],
-                importe=float(data["importe"]),  # Convertir a float
+                importe=importe,  # Convertir a float
                 periodicidad=data["periodicidad"],
                 dia_presentacion=data.get("dia_presentacion"),  # Valor por defecto 5
                 medio_pago=data["medio_pago"],
@@ -355,10 +358,13 @@ class FormularioGoogleSheetsView(generics.CreateAPIView):
             serializer.is_valid(raise_exception=True)
             registro = serializer.save()
             
-           
+            
             fundraiser = User.objects.get(role='COMERCIAL', fundRaiserCode=data["fundraiser_code"])
             fecha_creacion = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            
+            try:
+                importe = float(data["importe"])
+            except (KeyError, ValueError, TypeError):
+                importe = 0
             socio = Socio.objects.create(
                 nombre_socio=data["nombre"],
                 apellido_socio=data["apellidos"],
@@ -370,7 +376,7 @@ class FormularioGoogleSheetsView(generics.CreateAPIView):
                 cp_direccion=data["cp_direccion"],
                 ciudad_direccion=data["ciudad_direccion"],
                 estado_provincia=data["estado_provincia"],
-                importe=float(data["importe"]),
+                importe=importe,
                 periodicidad=data["periodicidad"],
                 dia_presentacion=data.get("dia_presentacion", 5),
                 medio_pago=data["medio_pago"],
